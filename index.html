@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portafolio Académico Universitario</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontInter & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase JS v2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); }
+        .dark .glass-card { background: rgba(17, 24, 39, 0.85); backdrop-filter: blur(12px); }
+        /* Transiciones suaves */
+        .fade-in { animation: fadeIn 0.3s ease-in-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="h-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col transition-colors duration-200">
+
+    <!-- Barra de Navegación Superior -->
+    <header class="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="router.navigate('#/inicio')">
+                <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-xl shadow-lg shadow-indigo-500/30">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <span class="font-bold text-lg tracking-tight bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">PortafolioAcadémico</span>
+                    <span class="block text-xs text-slate-500 dark:text-slate-400">Universidad Nacional</span>
+                </div>
+            </div>
+
+            <!-- Navegación desktop -->
+            <nav class="hidden md:flex items-center space-x-6 text-sm font-medium">
+                <a href="#/inicio" class="nav-link hover:text-indigo-600 transition-colors py-2"><i class="fa-solid fa-house mr-1.5"></i> Inicio</a>
+                <a href="#/facultades" class="nav-link hover:text-indigo-600 transition-colors py-2"><i class="fa-solid fa-building-columns mr-1.5"></i> Facultades</a>
+                <a href="#/sobre-mi" class="nav-link hover:text-indigo-600 transition-colors py-2"><i class="fa-solid fa-user-graduate mr-1.5"></i> Sobre mí</a>
+                <a href="#/contacto" class="nav-link hover:text-indigo-600 transition-colors py-2"><i class="fa-solid fa-envelope mr-1.5"></i> Contacto</a>
+                <span id="admin-nav-item" class="hidden">
+                    <button onclick="adminModal.openConfig()" class="bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-amber-500/20 transition-all flex items-center space-x-1">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>Panel Admin</span>
+                    </button>
+                </span>
+            </nav>
+
+            <!-- Controles de Usuario y Tema -->
+            <div class="flex items-center space-x-3">
+                <button onclick="toggleDarkMode()" class="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Cambiar tema">
+                    <i class="fa-solid fa-moon dark:hidden"></i>
+                    <i class="fa-solid fa-sun hidden dark:inline text-amber-400"></i>
+                </button>
+
+                <div id="auth-container">
+                    <!-- Dinámico según auth.js -->
+                    <button onclick="authModal.openLogin()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold shadow-md shadow-indigo-500/20 transition-all">
+                        <i class="fa-solid fa-right-to-bracket mr-1.5"></i> Iniciar sesión
+                    </button>
+                </div>
+
+                <!-- Botón Menú Móvil -->
+                <button onclick="toggleMobileMenu()" class="md:hidden p-2 text-slate-600 dark:text-slate-300">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Menú Móvil Desplegable -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 py-3 space-y-2">
+            <a href="#/inicio" onclick="toggleMobileMenu()" class="block py-2 text-sm font-medium">Inicio</a>
+            <a href="#/facultades" onclick="toggleMobileMenu()" class="block py-2 text-sm font-medium">Facultades</a>
+            <a href="#/sobre-mi" onclick="toggleMobileMenu()" class="block py-2 text-sm font-medium">Sobre mí</a>
+            <a href="#/contacto" onclick="toggleMobileMenu()" class="block py-2 text-sm font-medium">Contacto</a>
+            <div id="mobile-admin-item" class="pt-2 hidden"></div>
+        </div>
+    </header>
+
+    <!-- Migas de Pan (Breadcrumbs) -->
+    <div id="breadcrumbs-container" class="bg-white/50 dark:bg-slate-900/50 border-b border-slate-200/60 dark:border-slate-800/60 px-4 sm:px-6 lg:px-8 py-2 text-xs text-slate-500 dark:text-slate-400 hidden">
+        <div class="max-w-7xl mx-auto flex items-center space-x-2 overflow-x-auto whitespace-nowrap" id="breadcrumbs-list">
+            <!-- Dinámico -->
+        </div>
+    </div>
+
+    <!-- Contenido Principal Dinámico -->
+    <main id="app-view" class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 fade-in">
+        <!-- Renderizado dinámico SPA -->
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-6 text-center text-xs text-slate-500 dark:text-slate-400 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p>© 2026 Portafolio Académico Universitario. Todos los derechos reservados.</p>
+            <div class="flex items-center space-x-4">
+                <a href="#/sobre-mi" class="hover:underline">Acerca de</a>
+                <a href="#/contacto" class="hover:underline">Soporte</a>
+                <span class="text-indigo-600 font-semibold">Supabase Cloud + GitHub Pages</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Contenedor de Toasts (Notificaciones) -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-3 pointer-events-none"></div>
+
+    <!-- Modal Dinámico Universal -->
+    <div id="global-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div id="modal-content" class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200 dark:border-slate-800 fade-in">
+            <!-- Contenido dinámico del modal -->
+        </div>
+    </div>
+
+    <!-- SCRIPTS DE APLICACIÓN -->
+    <script>
+        // ==========================================
+        // 1. CONFIG.JS - CREDENCIALES SUPABASE
+        // ==========================================
+        const SUPABASE_URL = 'https://tu-proyecto.supabase.co'; // Reemplace con su URL de Supabase
+        const SUPABASE_ANON_KEY = 'tu-anon-key-aqui';           // Reemplace con su Anon Key
+
+        let supabaseClient = null;
+        try {
+            if (SUPABASE_URL !== 'https://tu-proyecto.supabase.co' && window.supabase) {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+        } catch (e) {
+            console.error("Error al inicializar cliente Supabase:", e);
+        }
+
+        // ==========================================
+        // 2. STATE & TOAST MANAGER
+        // ==========================================
+        const State = {
+            user: null,
+            profile: null,
+            isAdmin: false,
+            currentView: 'inicio',
+            facultadActiva: null,
+            cicloActivo: null,
+            unidadActiva: null,
+            facultades: [],
+            ciclos: [],
+            unidades: [],
+            semanas: [],
+            trabajos: [],
+            favoritos: []
+        };
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgCol = type === 'success' ? 'bg-emerald-600 text-white' : type === 'error' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-white';
+            const icon = type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-info';
+            
+            toast.className = `pointer-events-auto px-4 py-3 rounded-xl shadow-lg flex items-center space-x-3 text-sm font-medium ${bgCol} fade-in`;
+            toast.innerHTML = `<i class="fa-solid ${icon} text-lg"></i><span>${message}</span>`;
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(10px)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        }
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        }
+
+        // ==========================================
+        // 3. AUTH.JS - GESTIÓN DE SESIÓN Y ROLES
+        // ==========================================
+        const Auth = {
+            async init() {
+                if (!supabaseClient) {
+                    this.renderAuthUI();
+                    return;
+                }
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (session) {
+                    State.user = session.user;
+                    await this.fetchProfile();
+                }
+                supabaseClient.auth.onAuthStateChange(async (event, session) => {
+                    State.user = session ? session.user : null;
+                    if (State.user) {
+                        await this.fetchProfile();
+                    } else {
+                        State.profile = null;
+                        State.isAdmin = false;
+                    }
+                    this.renderAuthUI();
+                    Router.handleRoute();
+                });
+                this.renderAuthUI();
+            },
+
+            async fetchProfile() {
+                if (!State.user) return;
+                const { data, error } = await supabaseClient
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', State.user.id)
+                    .single();
+                if (data) {
+                    State.profile = data;
+                    State.isAdmin = data.rol === 'admin';
+                }
+            },
+
+            renderAuthUI() {
+                const container = document.getElementById('auth-container');
+                const adminItem = document.getElementById('admin-nav-item');
+                const mobileAdminItem = document.getElementById('mobile-admin-item');
+
+                if (State.user && State.profile) {
+                    const roleBadge = State.isAdmin ? '<span class="bg-amber-500/20 text-amber-600 dark:text-amber-400 text-xs px-2 py-0.5 rounded-full font-bold ml-1">Admin</span>' : '<span class="bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs px-2 py-0.5 rounded-full font-medium ml-1">Estudiante</span>';
+                    
+                    container.innerHTML = `
+                        <div class="flex items-center space-x-3">
+                            <div class="text-right hidden sm:block">
+                                <div class="text-xs font-bold">${State.profile.nombre || State.user.email}</div>
+                                <div>${roleBadge}</div>
+                            </div>
+                            <button onclick="Auth.logout()" class="p-2 text-slate-500 hover:text-rose-600 transition-colors" title="Cerrar sesión">
+                                <i class="fa-solid fa-right-from-bracket text-lg"></i>
+                            </button>
+                        </div>
+                    `;
+                    if (State.isAdmin) {
+                        adminItem.classList.remove('hidden');
+                        mobileAdminItem.classList.remove('hidden');
+                        mobileAdminItem.innerHTML = `<button onclick="adminModal.openConfig(); toggleMobileMenu();" class="w-full text-left py-2 text-sm font-semibold text-amber-600"><i class="fa-solid fa-shield-halved mr-2"></i> Panel Admin</button>`;
+                    } else {
+                        adminItem.classList.add('hidden');
+                        mobileAdminItem.classList.add('hidden');
+                    }
+                } else {
+                    container.innerHTML = `
+                        <button onclick="authModal.openLogin()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold shadow-md shadow-indigo-500/20 transition-all flex items-center">
+                            <i class="fa-solid fa-right-to-bracket mr-1.5"></i> Iniciar sesión
+                        </button>
+                    `;
+                    adminItem.classList.add('hidden');
+                    mobileAdminItem.classList.add('hidden');
+                }
+            },
+
+            async logout() {
+                if (!supabaseClient) return;
+                await supabaseClient.auth.signOut();
+                showToast('Sesión cerrada correctamente', 'info');
+                Router.navigate('#/inicio');
+            }
+        };
+
+        // ==========================================
+        // 4. ROUTER.JS - HASH ROUTING SPA
+        // ==========================================
+        const Router = {
+            init() {
+                window.addEventListener('hashchange', () => this.handleRoute());
+                if (!window.location.hash) {
+                    window.location.hash = '#/inicio';
+                } else {
+                    this.handleRoute();
+                }
+            },
+
+            navigate(hash) {
+                window.location.hash = hash;
+            },
+
+            async handleRoute() {
+                const hash = window.location.hash || '#/inicio';
+                const parts = hash.split('/');
+                
+                // Actualizar links activos en nav
+                document.querySelectorAll('.nav-link').forEach(el => {
+                    if (el.getAttribute('href') === `#/${parts[1]}`) {
+                        el.classList.add('text-indigo-600', 'font-bold');
+                    } else {
+                        el.classList.remove('text-indigo-600', 'font-bold');
+                    }
+                });
+
+                const viewContainer = document.getElementById('app-view');
+                viewContainer.innerHTML = `<div class="flex justify-center items-center py-20"><i class="fa-solid fa-spinner fa-spin text-3xl text-indigo-600"></i></div>`;
+
+                try {
+                    if (hash === '#/inicio' || hash === '#/') {
+                        UI.renderHome();
+                    } else if (hash === '#/facultades') {
+                        UI.renderFacultades();
+                    } else if (parts[1] === 'facultad' && parts[2]) {
+                        await UI.renderFacultadDetail(parts[2]);
+                    } else if (parts[1] === 'ciclo' && parts[2]) {
+                        await UI.renderCicloDetail(parts[2]);
+                    } else if (hash === '#/sobre-mi') {
+                        UI.renderSobreMi();
+                    } else if (hash === '#/contacto') {
+                        UI.renderContacto();
+                    } else {
+                        UI.renderHome();
+                    }
+                } catch (err) {
+                    console.error("Error en router:", err);
+                    viewContainer.innerHTML = `<div class="p-8 text-center text-rose-600">Error al cargar la vista. Verifique su conexión o credenciales de Supabase.</div>`;
+                }
+            }
+        };
+
+        // ==========================================
+        // 5. SUPABASE DATA LAYER & API
+        // ==========================================
+        const Api = {
+            async getFacultades() {
+                if (!supabaseClient) return [
+                    { id: '1', nombre: 'Medicina Humana', slug: 'medicina-humana', icono: '🩺', color_tema: 'rose' },
+                    { id: '2', nombre: 'Ingeniería', slug: 'ingenieria', icono: '💻', color_tema: 'blue' },
+                    { id: '3', nombre: 'Contabilidad y Finanzas', slug: 'contabilidad', icono: '📊', color_tema: 'emerald' },
+                    { id: '4', nombre: 'Ciencias de la Salud', slug: 'salud', icono: '🧬', color_tema: 'teal' },
+                    { id: '5', nombre: 'Derecho', slug: 'derecho', icono: '⚖️', color_tema: 'amber' },
+                    { id: '6', nombre: 'Humanidades', slug: 'humanidades', icono: '📚', color_tema: 'indigo' }
+                ];
+                const { data, error } = await supabaseClient.from('facultades').select('*').order('orden', { ascending: true });
+                if (error) throw error;
+                return data;
+            },
+
+            async getCiclosByFacultad(facultadId) {
+                if (!supabaseClient) return [];
+                const { data, error } = await supabaseClient.from('ciclos').select('*').eq('facultad_id', facultadId).order('orden', { ascending: true });
+                if (error) throw error;
+                return data;
+            },
+
+            async getUnidadesByCiclo(cicloId) {
+                if (!supabaseClient) return [];
+                const { data, error } = await supabaseClient.from('unidades').select('*').eq('ciclo_id', cicloId).order('orden', { ascending: true });
+                if (error) throw error;
+                return data;
+            },
+
+            async getSemanasByUnidad(unidadId) {
+                if (!supabaseClient) return [];
+                const { data, error } = await supabaseClient.from('semanas').select('*').eq('unidad_id', unidadId).order('numero', { ascending: true });
+                if (error) throw error;
+                return data;
+            },
+
+            async getTrabajosBySemana(semanaId) {
+                if (!supabaseClient) return [];
+                const { data, error } = await supabaseClient.from('trabajos').select('*, recursos(*)').eq('semana_id', semanaId).order('fecha', { ascending: false });
+                if (error) throw error;
+                return data;
+            },
+
+            async getComentarios(trabajoId) {
+                if (!supabaseClient) return [];
+                const { data, error } = await supabaseClient.from('comentarios').select('*, profiles(nombre, email)').eq('trabajo_id', trabajoId).order('created_at', { ascending: false });
+                if (error) throw error;
+                return data;
+            }
+        };
+
+        // ==========================================
+        // 6. UI.JS - RENDERIZADO DE VISTAS Y COMPONENTES
+        // ==========================================
+        const UI = {
+            updateBreadcrumbs(items) {
+                const container = document.getElementById('breadcrumbs-container');
+                const list = document.getElementById('breadcrumbs-list');
+                if (!items || items.length === 0) {
+                    container.classList.add('hidden');
+                    return;
+                }
+                container.classList.remove('hidden');
+                let html = `<a href="#/inicio" class="hover:text-indigo-600"><i class="fa-solid fa-house"></i></a>`;
+                items.forEach((item, idx) => {
+                    html += `<span class="text-slate-400">/</span>`;
+                    if (idx === items.length - 1) {
+                        html += `<span class="font-semibold text-slate-700 dark:text-slate-200">${item.name}</span>`;
+                    } else {
+                        html += `<a href="${item.url}" class="hover:text-indigo-600">${item.name}</a>`;
+                    }
+                });
+                list.innerHTML = html;
+            },
+
+            async renderHome() {
+                this.updateBreadcrumbs([]);
+                let facultades = [];
+                try {
+                    facultades = await Api.getFacultades();
+                } catch(e) { console.error(e); }
+
+                const view = document.getElementById('app-view');
+                view.innerHTML = `
+                    <!-- Hero Section -->
+                    <div class="text-center py-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
+                        <span class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-bold mb-4">
+                            <i class="fa-solid fa-bolt"></i> <span>Plataforma Académica Oficial</span>
+                        </span>
+                        <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight mb-6">
+                            Portafolio de <span class="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">Trabajos Universitarios</span>
+                        </h1>
+                        <p class="text-lg text-slate-600 dark:text-slate-400 mb-8 max-w-2xl mx-auto">
+                            Explora proyectos, investigaciones, prácticas y recursos organizados rigurosamente por facultades, ciclos, unidades y semanas de estudio.
+                        </p>
+                        <div class="flex flex-wrap justify-center gap-4">
+                            <a href="#/facultades" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-lg shadow-indigo-500/30 transition-all flex items-center space-x-2">
+                                <i class="fa-solid fa-compass"></i><span>Explorar Facultades</span>
+                            </a>
+                            ${State.isAdmin ? `
+                            <button onclick="adminModal.openCreateFacultad()" class="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-2xl shadow-lg shadow-amber-500/30 transition-all flex items-center space-x-2">
+                                <i class="fa-solid fa-plus"></i><span>Nueva Facultad</span>
+                            </button>` : ''}
+                        </div>
+                    </div>
+
+                    <!-- Facultades Grid -->
+                    <div class="mt-8 mb-16">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-2xl font-bold tracking-tight">Facultades y Escuelas</h2>
+                            <span class="text-xs text-slate-500">${facultades.length} áreas disponibles</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            ${facultades.map(f => {
+                                const themeColors = {
+                                    rose: 'from-rose-500/10 to-rose-600/20 text-rose-600 border-rose-500/30',
+                                    blue: 'from-blue-500/10 to-blue-600/20 text-blue-600 border-blue-500/30',
+                                    emerald: 'from-emerald-500/10 to-emerald-600/20 text-emerald-600 border-emerald-500/30',
+                                    teal: 'from-teal-500/10 to-teal-600/20 text-teal-600 border-teal-500/30',
+                                    amber: 'from-amber-500/10 to-amber-600/20 text-amber-600 border-amber-500/30',
+                                    indigo: 'from-indigo-500/10 to-indigo-600/20 text-indigo-600 border-indigo-500/30'
+                                };
+                                const col = themeColors[f.color_tema] || themeColors['indigo'];
+                                return `
+                                    <div onclick="Router.navigate('#/facultad/${f.id}')" class="group bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 hover:shadow-xl transition-all cursor-pointer relative overflow-hidden">
+                                        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${col} rounded-bl-full opacity-50 transition-transform group-hover:scale-110"></div>
+                                        <div class="relative z-10">
+                                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br ${col} flex items-center justify-center text-2xl mb-4 shadow-md">
+                                                ${f.icono || '🎓'}
+                                            </div>
+                                            <h3 class="text-xl font-bold mb-2 group-hover:text-indigo-600 transition-colors">${f.nombre}</h3>
+                                            <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Portafolio académico oficial de trabajos y proyectos evaluados.</p>
+                                            <div class="flex items-center text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+                                                <span>Ver ciclos y cursos</span>
+                                                <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                                            </div>
+                                        </div>
+                                        ${State.isAdmin ? `
+                                        <div class="absolute bottom-4 right-4 z-20 flex space-x-1" onclick="event.stopPropagation()">
+                                            <button onclick="adminModal.openEditFacultad('${f.id}', '${f.nombre}', '${f.icono}', '${f.color_tema}')" class="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-600 hover:text-indigo-600"><i class="fa-solid fa-pen text-xs"></i></button>
+                                            <button onclick="adminModal.deleteFacultad('${f.id}')" class="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-600 hover:text-rose-600"><i class="fa-solid fa-trash text-xs"></i></button>
+                                        </div>` : ''}
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            },
+
+            async renderFacultades() {
+                this.renderHome();
+            },
+
+            async renderFacultadDetail(facultadId) {
+                let facultades = await Api.getFacultades();
+                let facultad = facultades.find(f => f.id === facultadId);
+                if (!facultad) {
+                    document.getElementById('app-view').innerHTML = `<div class="p-8 text-center">Facultad no encontrada.</div>`;
+                    return;
+                }
+
+                this.updateBreadcrumbs([
+                    { name: 'Facultades', url: '#/facultades' },
+                    { name: facultad.nombre, url: `#/facultad/${facultadId}` }
+                ]);
+
+                let ciclos = await Api.getCiclosByFacultad(facultadId);
+
+                const view = document.getElementById('app-view');
+                view.innerHTML = `
+                    <div class="mb-8 bg-gradient-to-r from-indigo-900 to-slate-900 rounded-3xl p-8 text-white relative overflow-hidden shadow-2xl">
+                        <div class="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                            <div>
+                                <span class="text-4xl mb-3 block">${facultad.icono || '🎓'}</span>
+                                <h1 class="text-3xl sm:text-4xl font-extrabold mb-2">${facultad.nombre}</h1>
+                                <p class="text-indigo-200 text-sm max-w-xl">Selecciona un ciclo académico para acceder a las unidades de aprendizaje, semanas y portafolios de trabajos.</p>
+                            </div>
+                            ${State.isAdmin ? `
+                            <button onclick="adminModal.openCreateCiclo('${facultadId}')" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-xl shadow-lg transition-all flex items-center space-x-2 text-sm">
+                                <i class="fa-solid fa-plus"></i><span>Nuevo Ciclo</span>
+                            </button>` : ''}
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        ${ciclos.length === 0 ? `<div class="col-span-full py-12 text-center text-slate-500">No hay ciclos registrados en esta facultad. ${State.isAdmin ? 'Usa el botón "Nuevo Ciclo" para empezar.' : ''}</div>` : ''}
+                        ${ciclos.map(c => `
+                            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                                <div>
+                                    <div class="flex justify-between items-start mb-4">
+                                        <div class="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-lg">
+                                            <i class="fa-solid fa-layer-group"></i>
+                                        </div>
+                                        ${State.isAdmin ? `
+                                        <div class="flex space-x-1">
+                                            <button onclick="adminModal.openEditCiclo('${c.id}', '${c.nombre}')" class="p-2 text-slate-400 hover:text-indigo-600"><i class="fa-solid fa-pen text-xs"></i></button>
+                                            <button onclick="adminModal.deleteCiclo('${c.id}')" class="p-2 text-slate-400 hover:text-rose-600"><i class="fa-solid fa-trash text-xs"></i></button>
+                                        </div>` : ''}
+                                    </div>
+                                    <h3 class="text-xl font-bold mb-2">${c.nombre}</h3>
+                                    <p class="text-xs text-slate-500 mb-6">Estructurado por unidades y semanas de evaluación continua.</p>
+                                </div>
+                                <button onclick="UI.renderCicloDetailModal('${c.id}', '${c.nombre}', '${facultadId}')" class="w-full py-3 bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white dark:bg-slate-800 dark:hover:bg-indigo-600 font-semibold rounded-xl transition-all text-sm flex items-center justify-center space-x-2">
+                                    <span>Ingresar al Ciclo</span>
+                                    <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            },
+
+            async renderCicloDetailModal(cicloId, cicloNombre, facultadId) {
+                Router.navigate(`#/ciclo/${cicloId}`);
+            },
+
+            async renderCicloDetail(cicloId) {
+                let unidades = await Api.getUnidadesByCiclo(cicloId);
+                
+                this.updateBreadcrumbs([
+                    { name: 'Facultades', url: '#/facultades' },
+                    { name: 'Detalle Ciclo', url: `#/ciclo/${cicloId}` }
+                ]);
+
+                const view = document.getElementById('app-view');
+                view.innerHTML = `
+                    <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div>
+                            <h1 class="text-3xl font-extrabold mb-1">Unidades y Semanas Académicas</h1>
+                            <p class="text-sm text-slate-500">Navega a través de las unidades didácticas y semanas para revisar los trabajos universitarios.</p>
+                        </div>
+                        ${State.isAdmin ? `
+                        <button onclick="adminModal.openCreateUnidad('${cicloId}')" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-xl shadow-md text-sm flex items-center space-x-2">
+                            <i class="fa-solid fa-plus"></i><span>Nueva Unidad</span>
+                        </button>` : ''}
+                    </div>
+
+                    <!-- Buscador y Filtros -->
+                    <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 mb-6 flex flex-col md:flex-row gap-4">
+                        <div class="flex-grow relative">
+                            <i class="fa-solid fa-search absolute left-3.5 top-3.5 text-slate-400"></i>
+                            <input type="text" id="search-input" oninput="UI.filterTrabajos()" placeholder="Buscar trabajo por título, curso, docente o tags..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:outline-none focus:border-indigo-500">
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <select id="filter-tipo" onchange="UI.filterTrabajos()" class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:outline-none">
+                                <option value="">Todos los tipos</option>
+                                <option value="pdf">PDF</option>
+                                <option value="docx">Word (DOCX)</option>
+                                <option value="link">Enlace</option>
+                                <option value="mp3">Audio (MP3)</option>
+                                <option value="mp4">Video (MP4)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón de Unidades y Semanas -->
+                    <div class="space-y-6" id="unidades-container">
+                        ${unidades.length === 0 ? `<div class="py-12 text-center text-slate-500 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">No hay unidades registradas en este ciclo. ${State.isAdmin ? 'Agrega una unidad para continuar.' : ''}</div>` : ''}
+                        ${await Promise.all(unidades.map(async u => {
+                            let semanas = await Api.getSemanasByUnidad(u.id);
+                            return `
+                                <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                                    <div class="p-5 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
+                                        <div>
+                                            <h2 class="text-lg font-bold flex items-center space-x-2">
+                                                <i class="fa-solid fa-folder-open text-indigo-600"></i>
+                                                <span>${u.nombre}</span>
+                                            </h2>
+                                        </div>
+                                        <div class="flex items-center space-x-3">
+                                            ${State.isAdmin ? `
+                                            <button onclick="adminModal.openCreateSemana('${u.id}')" class="px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-semibold hover:bg-indigo-700 flex items-center space-x-1">
+                                                <i class="fa-solid fa-plus"></i><span>Semana</span>
+                                            </button>
+                                            <button onclick="adminModal.openEditUnidad('${u.id}', '${u.nombre}')" class="p-1.5 text-slate-400 hover:text-indigo-600"><i class="fa-solid fa-pen text-xs"></i></button>
+                                            <button onclick="adminModal.deleteUnidad('${u.id}')" class="p-1.5 text-slate-400 hover:text-rose-600"><i class="fa-solid fa-trash text-xs"></i></button>` : ''}
+                                        </div>
+                                    </div>
+
+                                    <div class="p-5 space-y-4">
+                                        ${semanas.length === 0 ? `<p class="text-sm text-slate-400 italic">No hay semanas configuradas en esta unidad.</p>` : ''}
+                                        ${await Promise.all(semanas.map(async s => {
+                                            let trabajos = await Api.getTrabajosBySemana(s.id);
+                                            return `
+                                                <div class="border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-slate-50/50 dark:bg-slate-900/50">
+                                                    <div class="flex justify-between items-center mb-3">
+                                                        <h3 class="font-bold text-sm sm:text-base text-indigo-600 dark:text-indigo-400 flex items-center space-x-2">
+                                                            <i class="fa-solid fa-calendar-week"></i>
+                                                            <span>Semana ${s.numero}: ${s.titulo}</span>
+                                                        </h3>
+                                                        <div class="flex items-center space-x-2">
+                                                            ${State.isAdmin ? `
+                                                            <button onclick="adminModal.openCreateTrabajo('${s.id}')" class="px-2.5 py-1 bg-emerald-600 text-white rounded-lg text-xs font-semibold hover:bg-emerald-700"><i class="fa-solid fa-plus mr-1"></i> Trabajo</button>
+                                                            <button onclick="adminModal.openEditSemana('${s.id}', ${s.numero}, '${s.titulo}')" class="p-1 text-slate-400 hover:text-indigo-600"><i class="fa-solid fa-pen text-xs"></i></button>
+                                                            <button onclick="adminModal.deleteSemana('${s.id}')" class="p-1 text-slate-400 hover:text-rose-600"><i class="fa-solid fa-trash text-xs"></i></button>` : ''}
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 trabajos-grid">
+                                                        ${trabajos.length === 0 ? `<p class="text-xs text-slate-400 col-span-full">No hay trabajos registrados en esta semana.</p>` : ''}
+                                                        ${trabajos.map(t => `
+                                                            <div class="trabajo-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm hover:shadow-md transition-all flex flex-col justify-between" data-search="${t.nombre.toLowerCase()} ${t.curso ? t.curso.toLowerCase() : ''} ${t.docente ? t.docente.toLowerCase() : ''} ${t.tags ? t.tags.join(' ').toLowerCase() : ''}">
+                                                                <div>
+                                                                    <div class="flex justify-between items-start gap-2 mb-2">
+                                                                        <h4 class="font-bold text-base">${t.nombre}</h4>
+                                                                        ${t.nota ? `<span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-600 font-bold text-xs rounded-full">Nota: ${t.nota}</span>` : ''}
+                                                                    </div>
+                                                                    <p class="text-xs text-slate-600 dark:text-slate-400 mb-3">${t.descripcion || 'Sin descripción detallada.'}</p>
+                                                                    <div class="flex flex-wrap gap-2 text-xs text-slate-500 mb-4">
+                                                                        ${t.curso ? `<span class="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-lg"><i class="fa-solid fa-book mr-1"></i>${t.curso}</span>` : ''}
+                                                                        ${t.docente ? `<span class="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-lg"><i class="fa-solid fa-chalkboard-user mr-1"></i>${t.docente}</span>` : ''}
+                                                                        ${t.fecha ? `<span class="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-lg"><i class="fa-solid fa-calendar mr-1"></i>${t.fecha}</span>` : ''}
+                                                                    </div>
+                                                                    ${t.tags && t.tags.length > 0 ? `
+                                                                    <div class="flex flex-wrap gap-1 mb-4">
+                                                                        ${t.tags.map(tag => `<span class="text-[10px] bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded font-medium">#${tag}</span>`).join('')}
+                                                                    </div>` : ''}
+                                                                </div>
+
+                                                                <div>
+                                                                    <div class="border-t border-slate-100 dark:border-slate-800 pt-3 flex flex-wrap gap-2 items-center justify-between">
+                                                                        <div class="flex flex-wrap gap-2">
+                                                                            ${t.recursos && t.recursos.map(r => `
+                                                                                <button onclick="UI.openRecursoModal('${r.tipo}', '${r.url}', '${r.nombre_archivo || 'Recurso'}')" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900 text-indigo-600 dark:text-indigo-300 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-colors">
+                                                                                    <i class="fa-solid ${r.tipo === 'pdf' ? 'fa-file-pdf text-rose-500' : r.tipo === 'docx' ? 'fa-file-word text-blue-500' : r.tipo === 'mp3' ? 'fa-file-audio text-amber-500' : r.tipo === 'mp4' ? 'fa-file-video text-emerald-500' : 'fa-link'}"></i>
+                                                                                    <span class="capitalize">${r.tipo}</span>
+                                                                                </button>
+                                                                            `).join('')}
+                                                                        </div>
+                                                                        ${State.isAdmin ? `
+                                                                        <div class="flex space-x-1">
+                                                                            <button onclick="adminModal.openEditTrabajo('${t.id}')" class="p-1.5 text-slate-400 hover:text-indigo-600" title="Editar trabajo"><i class="fa-solid fa-pen text-xs"></i></button>
+                                                                            <button onclick="adminModal.deleteTrabajo('${t.id}')" class="p-1.5 text-slate-400 hover:text-rose-600" title="Eliminar trabajo"><i class="fa-solid fa-trash text-xs"></i></button>
+                                                                        </div>` : ''}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        `).join('')}
+                                                    </div>
+                                                </div>
+                                            `;
+                                        })).then(res => res.join(''))}
+                                    </div>
+                                </div>
+                            `;
+                        })).then(res => res.join(''))}
+                    </div>
+                `;
+            },
+
+            filterTrabajos() {
+                const query = document.getElementById('search-input').value.toLowerCase();
+                const tipoFilter = document.getElementById('filter-tipo').value;
+                document.querySelectorAll('.trabajo-card').forEach(card => {
+                    const textMatch = card.getAttribute('data-search').includes(query);
+                    card.style.display = textMatch ? 'flex' : 'none';
+                });
+            },
+
+            openRecursoModal(tipo, url, nombre) {
+                const modal = document.getElementById('global-modal');
+                const content = document.getElementById('modal-content');
+                modal.classList.remove('hidden');
+
+                let previewHtml = '';
+                if (tipo === 'pdf') {
+                    previewHtml = `<iframe src="${url}" class="w-full h-96 rounded-xl border border-slate-200"></iframe>`;
+                } else if (tipo === 'mp4') {
+                    previewHtml = `<video src="${url}" controls class="w-full max-h-96 rounded-xl bg-black"></video>`;
+                } else if (tipo === 'mp3') {
+                    previewHtml = `<audio src="${url}" controls class="w-full"></audio>`;
+                } else {
+                    previewHtml = `<div class="p-6 text-center"><a href="${url}" target="_blank" class="px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl inline-flex items-center space-x-2"><i class="fa-solid fa-external-link"></i><span>Abrir enlace externo</span></a></div>`;
+                }
+
+                content.innerHTML = `
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-lg">${nombre}</h3>
+                            <button onclick="document.getElementById('global-modal').classList.add('hidden')" class="p-2 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+                        </div>
+                        <div class="mb-4">${previewHtml}</div>
+                        <div class="flex justify-end space-x-2">
+                            <a href="${url}" target="_blank" download class="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-sm font-semibold rounded-xl flex items-center space-x-2"><i class="fa-solid fa-download"></i><span>Descargar / Abrir</span></a>
+                        </div>
+                    </div>
+                `;
+            },
+
+            renderSobreMi() {
+                this.updateBreadcrumbs([{ name: 'Sobre mí', url: '#/sobre-mi' }]);
+                document.getElementById('app-view').innerHTML = `
+                    <div class="max-w-3xl mx-auto bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8 shadow-sm">
+                        <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 mb-8">
+                            <div class="w-28 h-28 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-4xl font-bold shadow-xl">
+                                <i class="fa-solid fa-user-graduate"></i>
+                            </div>
+                            <div class="text-center sm:text-left">
+                                <h1 class="text-2xl font-extrabold mb-1">Estudiante Universitario</h1>
+                                <p class="text-indigo-600 dark:text-indigo-400 font-medium text-sm mb-2">Facultad de Ingeniería y Arquitectura</p>
+                                <p class="text-xs text-slate-500">Apasionado por el desarrollo de software, la investigación científica y la innovación tecnológica.</p>
+                            </div>
+                        </div>
+                        <div class="space-y-4 text-sm text-slate-600 dark:text-slate-300">
+                            <h2 class="font-bold text-base text-slate-900 dark:text-white">Acerca del Portafolio</h2>
+                            <p>Este portafolio académico digital reúne los trabajos prácticos, monografías, proyectos de investigación y evidencias de aprendizaje desarrollados a lo largo de la carrera universitaria.</p>
+                            <h2 class="font-bold text-base text-slate-900 dark:text-white pt-2">Stack Tecnológico</h2>
+                            <p>Desarrollado con HTML5, Tailwind CSS, JavaScript Vanilla y Supabase (PostgreSQL, Auth, Storage y RLS), optimizado para despliegue rápido y seguro en GitHub Pages.</p>
+                        </div>
+                    </div>
+                `;
+            },
+
+            renderContacto() {
+                this.updateBreadcrumbs([{ name: 'Contacto', url: '#/contacto' }]);
+                document.getElementById('app-view').innerHTML = `
+                    <div class="max-w-xl mx-auto bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8 shadow-sm">
+                        <h1 class="text-2xl font-extrabold mb-2 text-center">Contacto Institucional</h1>
+                        <p class="text-sm text-slate-500 text-center mb-6">¿Tienes dudas, comentarios o deseas colaborar en algún proyecto de investigación? Escríbenos.</p>
+                        <form onsubmit="event.preventDefault(); showToast('Mensaje enviado exitosamente. Nos pondremos en contacto pronto.');" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold mb-1">Nombre completo</label>
+                                <input type="text" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:outline-none focus:border-indigo-500" placeholder="Ej. Juan Pérez">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold mb-1">Correo electrónico</label>
+                                <input type="email" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:outline-none focus:border-indigo-500" placeholder="correo@universidad.edu.pe">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold mb-1">Mensaje</label>
+                                <textarea rows="4" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:outline-none focus:border-indigo-500" placeholder="Escribe tu mensaje..."></textarea>
+                            </div>
+                            <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md transition-all text-sm">Enviar Mensaje</button>
+                        </form>
+                    </div>
+                `;
+            }
+        };
+
+        // ==========================================
+        // 7. AUTH MODAL (Login / Registro)
+        // ==========================================
+        const authModal = {
+            openLogin() {
+                const modal = document.getElementById('global-modal');
+                const content = document.getElementById('modal-content');
+                modal.classList.remove('hidden');
+                content.innerHTML = `
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-lg">Iniciar Sesión / Registrarse</h3>
+                            <button onclick="document.getElementById('global-modal').classList.add('hidden')" class="p-2 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold mb-1">Correo electrónico</label>
+                                <input type="email" id="auth-email" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:outline-none focus:border-indigo-500" placeholder="usuario@gmail.com">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold mb-1">Contraseña</label>
+                                <input type="password" id="auth-pass" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:outline-none focus:border-indigo-500" placeholder="••••••••">
+                            </div>
+                            <div class="flex gap-2 pt-2">
+                                <button onclick="authModal.handleLogin()" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm transition-all">Iniciar Sesión</button>
+                                <button onclick="authModal.handleRegister()" class="flex-1 py-3 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 font-bold rounded-xl text-sm transition-all">Registrarse</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            async handleLogin() {
+                const email = document.getElementById('auth-email').value;
+                const pass = document.getElementById('auth-pass').value;
+                if (!email || !pass) {
+                    showToast('Complete todos los campos', 'error');
+                    return;
+                }
+                if (!supabaseClient) {
+                    showToast('Configure Supabase en config.js', 'error');
+                    return;
+                }
+                const { error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
+                if (error) {
+                    showToast(error.message, 'error');
+                } else {
+                    showToast('¡Sesión iniciada correctamente!');
+                    document.getElementById('global-modal').classList.add('hidden');
+                }
+            },
+
+            async handleRegister() {
+                const email = document.getElementById('auth-email').value;
+                const pass = document.getElementById('auth-pass').value;
+                if (!email || !pass) {
+                    showToast('Complete todos los campos', 'error');
+                    return;
+                }
+                if (!supabaseClient) {
+                    showToast('Configure Supabase en config.js', 'error');
+                    return;
+                }
+                const { error } = await supabaseClient.auth.signUp({ email, password: pass });
+                if (error) {
+                    showToast(error.message, 'error');
+                } else {
+                    showToast('Registro exitoso. Verifique su correo o inicie sesión.');
+                    document.getElementById('global-modal').classList.add('hidden');
+                }
+            }
+        };
+
+        // ==========================================
+        // 8. ADMIN.JS - GESTIÓN Y CRUD COMPLETO
+        // ==========================================
+        const adminModal = {
+            openConfig() {
+                const modal = document.getElementById('global-modal');
+                const content = document.getElementById('modal-content');
+                modal.classList.remove('hidden');
+                content.innerHTML = `
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-lg text-amber-600 flex items-center space-x-2"><i class="fa-solid fa-shield-halved"></i><span>Panel de Administración</span></h3>
+                            <button onclick="document.getElementById('global-modal').classList.add('hidden')" class="p-2 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-6">Como administrador, tienes permisos completos de creación, edición y eliminación en cascada.</p>
+                        <div class="space-y-3">
+                            <button onclick="adminModal.openCreateFacultad();" class="w-full py-3 bg-indigo-50 hover:bg-indigo-100 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 font-semibold rounded-xl text-sm flex items-center justify-between px-4">
+                                <span><i class="fa-solid fa-plus mr-2"></i> Crear nueva Facultad</span>
+                                <i class="fa-solid fa-chevron-right text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // --- FACULTAD CRUD ---
+            openCreateFacultad() {
+                const modal = document.getElementById('global-modal');
+                const content = document.getElementById('modal-content');
+                modal.classList.remove('hidden');
+                content.innerHTML = `
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-lg">Nueva Facultad</h3>
+                            <button onclick="document.getElementById('global-modal').classList.add('hidden')" class="p-2 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <form onsubmit="event.preventDefault(); adminModal.saveFacultad();" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold mb-1">Nombre</label>
+                                <input type="text" id="fac-nombre" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold mb-1">Slug (ej. ingenieria-sistemas)</label>
+                                <input type="text" id="fac-slug" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold mb-1">Ícono (Emoji)</label>
+                                <input type="text" id="fac-icono" value="💻" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold mb-1">Color Tema (rose, blue, emerald, teal, amber, indigo)</label>
+                                <input type="text" id="fac-color" value="blue" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
+                            </div>
+                            <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm">Guardar Facultad</button>
+                        </form>
+                    </div>
+                `;
+            },
+
+            async saveFacultad() {
+                const nombre = document.getElementById('fac-nombre').value;
+                const slug = document.getElementById('fac-slug').value;
+                const icono = document.getElementById('fac-icono').value;
+                const color_tema = document.getElementById('fac-color').value;
+
+                if (!supabaseClient) { showToast('Supabase no conectado', 'error'); return; }
+                const { error } = await supabaseClient.from('facultades').insert([{ nombre, slug, icono, color_tema }]);
+                if (error) { showToast(error.message, 'error'); } else {
+                    showToast('Facultad creada exitosamente');
+                    document.getElementById('global-modal').classList.add('hidden');
+                    Router.handleRoute();
+                }
+            },
+
+            async deleteFacultad(id) {
+                if (!confirm('¿Está seguro de eliminar esta facultad? Se eliminarán en cascada todos sus ciclos, unidades, semanas y trabajos.')) return;
+                const { error } = await supabaseClient.from('facultades').delete().eq('id', id);
+                if (error) { showToast(error.message, 'error'); } else {
+                    showToast('Facultad eliminada');
+                    Router.handleRoute();
+                }
+            },
+
+            // --- CICLO CRUD ---
+            openCreateCiclo(facultadId) {
+                const modal = document.getElementById('global-modal');
+                const content = document.getElementById('modal-content');
+                modal.classList.remove('hidden');
+                content.innerHTML = `
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-lg">Nuevo Ciclo Académico</h3>
+                            <button onclick="document.getElementById('global-modal').classList.add('hidden')" class="p-2 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <form onsubmit="event.preventDefault(); adminModal.saveCiclo('${facultadId}');" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold mb-1">Nombre del Ciclo (ej. Ciclo VII)</label>
+                                <input type="text" id="cic-nombre" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
+                            </div>
+                            <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm">Guardar Ciclo</button>
+                        </form>
+                    </div>
+                `;
+            },
+
+            async saveCiclo(facultadId) {
+                const nombre = document.getElementById('cic-nombre').value;
+                const { error } = await supabaseClient.from('ciclos').insert([{ facultad_id: facultadId, nombre }]);
+                if (error) { showToast(error.message, 'error'); } else {
+                    showToast('Ciclo creado con éxito');
+                    document.getElementById('global-modal').classList.add('hidden');
+                    Router.handleRoute();
+                }
+            },
+
+            async deleteCiclo(id) {
+                if (!confirm('¿Eliminar este ciclo y todo su contenido en cascada?')) return;
+                const { error } = await supabaseClient.from('ciclos').delete().eq('id', id);
+                if (error) { showToast(error.message, 'error'); } else {
+                    showToast('Ciclo eliminado');
+                    Router.handleRoute();
+                }
+            },
+
+            // --- UNIDAD CRUD ---
+            openCreateUnidad(cicloId) {
+                const modal = document.getElementById('global-modal');
+                const content = document.getElementById('modal-content');
+                modal.classList.remove('hidden');
+                content.innerHTML = `
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-lg">Nueva Unidad Didáctica</h3>
+                            <button onclick="document.getElementById('global-modal').classList.add('hidden')" class="p-2 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <form onsubmit="event.preventDefault(); adminModal.saveUnidad('${cicloId}');" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold mb-1">Nombre de la Unidad</label>
+                                <input type="text" id="uni-nombre" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
+                            </div>
+                            <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm">Guardar Unidad</button>
+                        </form>
+                    </div>
+                `;
+            },
+
+            async saveUnidad(cicloId) {
+                const nombre = document.getElementById('uni-nombre').value;
+                const { error } = await supabaseClient.from('unidades').insert([{ ciclo_id: cicloId, nombre }]);
+                if (error) { showToast(error.message, 'error'); } else {
+                    showToast('Unidad creada');
+                    document.getElementById('global-modal').classList.add('hidden');
+                    Router.handleRoute();
+                }
+            },
+
+            async deleteUnidad(id) {
+                if (!confirm('¿Eliminar unidad y sus semanas en cascada?')) return;
+                const { error } = await supabaseClient.from('unidades').delete().eq('id', id);
+                if (error) { showToast(error.message, 'error'); } else {
+                    showToast('Unidad eliminada');
+                    Router.handleRoute();
+                }
+            },
+
+            // --- SEMANA CRUD ---
+            openCreateSemana(unidadId) {
+                const modal = document.getElementById('global-modal');
+                const content = document.getElementById('modal-content');
+                modal.classList.remove('hidden');
+                content.innerHTML = `
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-lg">Nueva Semana de Estudio</h3>
+                            <button onclick="document.getElementById('global-modal').classList.add('hidden')" class="p-2 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <form onsubmit="event.preventDefault(); adminModal.saveSemana('${unidadId}');" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold mb-1">Número de Semana</label>
+                                <input type="number" id="sem-numero" value="1" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold mb-1">Título de la Semana</label>
+                                <input type="text" id="sem-titulo" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
+                            </div>
+                            <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm">Guardar Semana</button>
+                        </form>
+                    </div>
+                `;
+            },
+
+            async saveSemana(unidadId) {
+                const numero = parseInt(document.getElementById('sem-numero').value);
+                const titulo = document.getElementById('sem-titulo').value;
+                const { error } = await supabaseClient.from('semanas').insert([{ unidad_id: unidadId, numero, titulo }]);
+                if (error) { showToast(error.message, 'error'); } else {
+                    showToast('Semana creada');
+                    document.getElementById('global-modal').classList.add('hidden');
+                    Router.handleRoute();
+                }
+            },
+
+            async deleteSemana(id) {
+                if (!confirm('¿Eliminar semana y sus trabajos?')) return;
+                const { error } = await supabaseClient.from('semanas').delete().eq('id', id);
+                if (error) { showToast(error.message, 'error'); } else {
+                    showToast('Semana eliminada');
+                    Router.handleRoute();
+                }
+            },
+
+            // --- TRABAJO CRUD & FILE UPLOAD ---
+            openCreateTrabajo(semanaId) {
+                const modal = document.getElementById('global-modal');
+                const content = document.getElementById('modal-content');
+                modal.classList.remove('hidden');
+                content.innerHTML = `
+                    <div class="p-6 max-h-[90vh] overflow-y-auto">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-lg">Nuevo Trabajo Académico</h3>
+                            <button onclick="document.getElementById('global-modal').classList.add('hidden')" class="p-2 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <form onsubmit="event.preventDefault(); adminModal.saveTrabajo('${semanaId}');" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold mb-1">Nombre del Trabajo *</label>
+                                <input type="text" id="trab-nombre" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold mb-1">Descripción</label>
+                                <textarea id="trab-desc" rows="3" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"></textarea>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold mb-1">Curso / Asignatura</label>
+                                    <input type="text" id="trab-curso" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold mb-1">Docente</label>
+                                    <input type="text" id="trab-docente" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold mb-1">Fecha</label>
+                                    <input type="date" id="trab-fecha" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold mb-1">Nota (Opcional)</label>
+                                    <input type="number" step="0.1" id="trab-nota" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold mb-1">Etiquetas (separadas por coma)</label>
+                                <input type="text" id="trab-tags" placeholder="Docker, Cloud, DevOps" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
+                            </div>
+                            <hr class="border-slate-200 dark:border-slate-800">
+                            <div>
+                                <label class="block text-xs font-semibold mb-1">Recurso / Archivo o Enlace</label>
+                                <select id="rec-tipo" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm mb-2">
+                                    <option value="link">Enlace Web / Repositorio</option>
+                                    <option value="pdf">Archivo PDF (Supabase Storage)</option>
+                                    <option value="docx">Archivo Word (DOCX)</option>
+                                    <option value="mp3">Audio (MP3)</option>
+                                    <option value="mp4">Video (MP4)</option>
+                                </select>
+                                <input type="text" id="rec-url" placeholder="URL externa o archivo subido" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm mb-2">
+                                <label class="block text-xs text-slate-500 mb-1">O subir archivo directamente:</label>
+                                <input type="file" id="rec-file" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100">
+                            </div>
+                            <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm">Guardar Trabajo y Recurso</button>
+                        </form>
+                    </div>
+                `;
+            },
+
+            async saveTrabajo(semanaId) {
+                const nombre = document.getElementById('trab-nombre').value;
+                const descripcion = document.getElementById('trab-desc').value;
+                const curso = document.getElementById('trab-curso').value;
+                const docente = document.getElementById('trab-docente').value;
+                const fecha = document.getElementById('trab-fecha').value || null;
+                const notaVal = document.getElementById('trab-nota').value;
+                const nota = notaVal ? parseFloat(notaVal) : null;
+                const tagsRaw = document.getElementById('trab-tags').value;
+                const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
+
+                const recTipo = document.getElementById('rec-tipo').value;
+                let recUrl = document.getElementById('rec-url').value;
+                const fileInput = document.getElementById('rec-file');
+
+                if (!supabaseClient) { showToast('Supabase no conectado', 'error'); return; }
+
+                // Subir archivo a Storage si se seleccionó uno
+                if (fileInput.files && fileInput.files[0]) {
+                    const file = fileInput.files[0];
+                    const filePath = `trabajos/${Date.now()}_${file.name}`;
+                    showToast('Subiendo archivo a Supabase Storage...', 'info');
+                    const { data: uploadData, error: uploadError } = await supabaseClient.storage.from('portafolio').upload(filePath, file);
+                    if (uploadError) {
+                        showToast('Error al subir archivo: ' + uploadError.message, 'error');
+                        return;
+                    }
+                    const { data: publicUrlData } = supabaseClient.storage.from('portafolio').getPublicUrl(filePath);
+                    recUrl = publicUrlData.publicUrl;
+                }
+
+                if (!recUrl) {
+                    showToast('Debe ingresar una URL o seleccionar un archivo', 'error');
+                    return;
+                }
+
+                // Insertar trabajo
+                const { data: trabajoData, error: trabajoError } = await supabaseClient.from('trabajos').insert([{
+                    semana_id: semanaId, nombre, descripcion, curso, docente, fecha, nota, tags, publicado: true
+                }]).select().single();
+
+                if (trabajoError) {
+                    showToast(trabajoError.message, 'error');
+                    return;
+                }
+
+                // Insertar recurso
+                const { error: recError } = await supabaseClient.from('recursos').insert([{
+                    trabajo_id: trabajoData.id, tipo: recTipo, url: recUrl, nombre_archivo: fileInput.files[0]?.name || 'Recurso Externo'
+                }]);
+
+                if (recError) {
+                    showToast(recError.message, 'error');
+                } else {
+                    showToast('Trabajo y recurso guardados correctamente');
+                    document.getElementById('global-modal').classList.add('hidden');
+                    Router.handleRoute();
+                }
+            },
+
+            async deleteTrabajo(id) {
+                if (!confirm('¿Eliminar este trabajo académico?')) return;
+                const { error } = await supabaseClient.from('trabajos').delete().eq('id', id);
+                if (error) { showToast(error.message, 'error'); } else {
+                    showToast('Trabajo eliminado');
+                    Router.handleRoute();
+                }
+            }
+        };
+
+        // ==========================================
+        // 9. INICIALIZACIÓN GLOBAL EN ONLOAD
+        // ==========================================
+        window.onload = async function() {
+            await Auth.init();
+            Router.init();
+        };
+    </script>
+</body>
+</html>
